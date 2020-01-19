@@ -44,60 +44,60 @@ public class SimpleGameClient
 {
 	private static MyGameGUI window;
 	private game_service game;
-//	private DGraph DG;
-//	private Graph_Algo GA;
+	//	private DGraph DG;
+	//	private Graph_Algo GA;
 	private String typegame;
 	private int scenario;
 	public Collection<node_data> vertex;
 	public Collection<edge_data> edges;
-	
+
 	public static void main(String[] a) 
 	{
-//		int scenario_num = 2;
-//		game_service game = Game_Server.getServer(scenario_num);
-//		
-//		DGraph DG = new DGraph();
-//		DG.init(game.getGraph());
-//		
-//		MyGameGUI window = new MyGameGUI(DG,game);
-//		window.setVisible(true);
-//		
+		//		int scenario_num = 2;
+		//		game_service game = Game_Server.getServer(scenario_num);
+		//		
+		//		DGraph DG = new DGraph();
+		//		DG.init(game.getGraph());
+		//		
+		//		MyGameGUI window = new MyGameGUI(DG,game);
+		//		window.setVisible(true);
+		//		
 		test1();
 	}
-	
+
 	//fruit type 1 from low to high apple
 	//fruit type -1 from high to low banana
 	public static void test1() 
 	{
-//		//game scenario 
+		//		//game scenario 
 		int scenario_num = 2;
 		game_service game = Game_Server.getServer(scenario_num); // you have [0,23] games
-//
-//
-//		//add robot to the graph-as the amount of the robots there is
-//		//game.addRobot(node_id);
-//
-//		//shows the scenario objects-robot-fruits how the graph look like
+		//
+		//
+		//		//add robot to the graph-as the amount of the robots there is
+		//		//game.addRobot(node_id);
+		//
+		//		//shows the scenario objects-robot-fruits how the graph look like
 		String g = game.getGraph();
-//
+		//
 		DGraph DG = new DGraph();
 		DG.init(game.getGraph());
-//		
 
-			
-		new Thread( new Runnable() {
-					
-					
-					@Override
-					public void run()
-					{
-						window = new MyGameGUI();
-						window.setVisible(true);
-						
-					}
-				}).start();
-		
-		
+
+
+
+		new Thread( new Runnable() 
+		{
+
+			@Override
+			public void run()
+			{
+				window = new MyGameGUI();
+				window.setVisible(true);
+
+			}
+		}).start();
+
 		String info = game.toString();
 		JSONObject line;
 
@@ -123,37 +123,37 @@ public class SimpleGameClient
 		//the clock count down ,begin the game begin
 
 		//while the game is live
-//		while(game.isRunning())
-//		{
-//			//move robot to next node, only a neighbor node
-//			game.chooseNextEdge(robot_id, node_dest_id);
-		
-//			//move the robot to the next destination, what we set in chooseNextEdge
-//			game.move();
-		
-//			//to know if a robot got to his destination we can check is dest if dest == -1 
-//			//the robot arrived to his destination
-//			
-//			if(System.currentTimeMillis() - first >= 1000)
-//			{	
-//				//shows the time to end game
-//				System.out.println(game.timeToEnd()/1000);//shows in seconds
-//				first = System.currentTimeMillis();
-//			}
-//			
-//		}
-		
+		//		while(game.isRunning())
+		//		{
+		//			//move robot to next node, only a neighbor node
+		//			game.chooseNextEdge(robot_id, node_dest_id);
+
+		//			//move the robot to the next destination, what we set in chooseNextEdge
+		//			game.move();
+
+		//			//to know if a robot got to his destination we can check is dest if dest == -1 
+		//			//the robot arrived to his destination
+		//			
+		//			if(System.currentTimeMillis() - first >= 1000)
+		//			{	
+		//				//shows the time to end game
+		//				System.out.println(game.timeToEnd()/1000);//shows in seconds
+		//				first = System.currentTimeMillis();
+		//			}
+		//			
+		//		}
+
 		// should be a Thread!!!
-		
+
 		new Thread( new Runnable() {
-			
-			
+
+
 			@Override
 			public void run()
 			{
 				game.startGame();
 
-				
+
 				while(game.isRunning())
 				{
 					game.chooseNextEdge(0, 5);
@@ -163,13 +163,13 @@ public class SimpleGameClient
 				String results = game.toString();
 				System.out.println("Game Over: "+results);
 				game.stopGame();
-				
+
 			}
 		}).start();
-		
+
 
 	}
-	
+
 	/** 
 	 * Moves each of the robots along the edge, 
 	 * in case the robot is on a node the next destination (next edge) is chosen (randomly).
@@ -179,40 +179,95 @@ public class SimpleGameClient
 	 */
 	private static void moveRobots(game_service game, graph gg)
 	{
-		List<String> log = game.move();
-		
-		if(window!=null)
+		List<String> robots = game.getRobots();
+		List<String> fruits = game.getFruits();
+		List<Fruit> f = MyGameGUI.creatFruits(fruits);
+		double maxValue = 0;
+		double minPath = Double.POSITIVE_INFINITY;
+		Fruit nextFruit = null;
+		Robot moveRobot = null;
+		if(robots.size() == 1)
 		{
-			window.addRobots(log);
-		}
-		
-		
-		if(log!=null) 
-		{
-			long t = game.timeToEnd();
-			for(int i=0;i<log.size();i++)
+			Robot r = new Robot(robots.get(0));
+			while(!f.isEmpty())
 			{
-				String robot_json = log.get(i);
-				try 
+				int rand = (int)(Math.random()*f.size());
+				Fruit randFruit = f.get(rand);
+				edge_data ed = Graph_Algo.onEdge(randFruit, gg);
+				double path = Graph_Algo.shortestPathDist(r.getSrc(), ed.getSrc());
+				if(maxValue < randFruit.getValue() && path < minPath)
 				{
-					JSONObject line = new JSONObject(robot_json);
-					JSONObject ttt = line.getJSONObject("Robot");
-					int rid = ttt.getInt("id");
-					int src = ttt.getInt("src");
-					int dest = ttt.getInt("dest");
-
-					if(dest==-1) 
-					{	
-						dest = nextNode(gg, src);
-						game.chooseNextEdge(rid, dest);
-						System.out.println("Turn to node: "+dest+"  time to end:"+(t/1000));
-						System.out.println(ttt);
-					}
-				} 
-				catch (JSONException e) {e.printStackTrace();}
+					maxValue = randFruit.getValue();
+					minPath = path;
+					nextFruit = randFruit;
+				}
+				f.remove(rand);
 			}
+			game.chooseNextEdge(r.getId(), ed.getDest());
+		}
+		else
+		{
+			List<Robot> robot = null;
+			for (String r : robots) 
+			{
+				Robot ro = new Robot(r);
+				robot.add(ro);
+			}
+			while(!f.isEmpty())
+			{
+				int rand = (int)(Math.random()*f.size());
+				Fruit randFruit = f.get(rand);
+				edge_data ed = Graph_Algo.onEdge(randFruit, gg);
+				for(int i=0; i<robot.size(); i++)
+				{
+					double path = Graph_Algo.shortestPathDist(ed.getSrc(), robot.get(i).getSrc());
+					if(maxValue < randFruit.getValue() && path < minPath)
+					{
+						maxValue = randFruit.getValue();
+						minPath = path;
+						nextFruit = randFruit;
+						moveRobot = robot.get(i);
+					}
+				}
+				f.remove(rand);
+			}
+			game.chooseNextEdge(moveRobot.getId(), ed.getDest());
 		}
 	}
+	//		List<String> log = game.move();
+
+	//		if(window!=null)
+	//		{
+	//			window.addRobots(log);
+	//		}
+	//		
+	//		
+	//		if(log!=null) 
+	//		{
+	//			long t = game.timeToEnd();
+	//			for(int i=0;i<log.size();i++)
+	//			{
+	//				String robot_json = log.get(i);
+	//				try 
+	//				{
+	//					JSONObject line = new JSONObject(robot_json);
+	//					JSONObject ttt = line.getJSONObject("Robot");
+	//					int rid = ttt.getInt("id");
+	//					int src = ttt.getInt("src");
+	//					int dest = ttt.getInt("dest");
+	//
+	//					if(dest==-1) 
+	//					{	
+	//						dest = nextNode(gg, src);
+	//						game.chooseNextEdge(rid, dest);
+	//						System.out.println("Turn to node: "+dest+"  time to end:"+(t/1000));
+	//						System.out.println(ttt);
+	//					}
+	//				} 
+	//				catch (JSONException e) {e.printStackTrace();}
+	//			}
+	//		}
+	//	}
 	/**
 	 * a very simple random walk implementation!
 	 * @param g
@@ -231,11 +286,11 @@ public class SimpleGameClient
 		ans = itr.next().getDest();
 		return ans;
 	}
-	
+
 	//manual move robots
-//	private static int nextNodeM(graph g, int src)
-//	{
-//		;
-//	}
+	//	private static int nextNodeM(graph g, int src)
+	//	{
+	//		;
+	//	}
 
 }

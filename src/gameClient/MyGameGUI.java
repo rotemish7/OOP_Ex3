@@ -30,6 +30,7 @@ import algorithms.Graph_Algo;
 import dataStructure.DGraph;
 import dataStructure.edge;
 import dataStructure.edge_data;
+import dataStructure.graph;
 import dataStructure.node_data;
 import utils.Point3D;
 
@@ -333,6 +334,31 @@ public class MyGameGUI extends JFrame implements ActionListener , MouseListener 
 				}
 			}
 		}
+		
+		    public void AutoSetRobot(game_service game,graph level_graph) throws JSONException
+		    {
+		        List<String> Temp_Fruit = game.getFruits();
+		        String info = game.toString();
+		        JSONObject line;
+		        line = new JSONObject(info);
+		        JSONObject ttt = line.getJSONObject("GameServer");
+		        int rs = ttt.getInt("robots");
+		        for (int i = 0; i < rs; i++) 
+		        {
+		            int maxFruit = Integer.MIN_VALUE;
+		            int MaxFruitID = 0;
+		            for (int j = 0; j < Temp_Fruit.size(); j++) 
+		            {
+		                Fruit f = new Fruit(Temp_Fruit, j);
+		                if (f.getValue() > maxFruit) {
+		                    maxFruit = f.getValue();
+		                    MaxFruitID = j;
+		                }
+		            }
+		            game.addRobot(new Game_Algo().getFruitEdge(MaxFruitID,game,level_graph).getSrc());
+		            Temp_Fruit.remove(MaxFruitID);
+		        }
+		    }
 
 		@Override
 		public void run() 
