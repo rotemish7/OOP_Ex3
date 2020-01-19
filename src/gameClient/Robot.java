@@ -3,6 +3,9 @@ package gameClient;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 
@@ -28,6 +31,32 @@ public class Robot
 		this.dest=dest;
 		this.value=value;
 		this.speed=speed;
+	}
+	
+	public Robot(String s) 
+	{
+		try 
+		{
+			JSONObject obj_JSONObject = new JSONObject(s);
+			JSONObject JSON_Robot = obj_JSONObject.getJSONObject("Robot");
+			int id = JSON_Robot.getInt("id"); // Extract the id of the robot
+			this.id = id;
+			int src = JSON_Robot.getInt("src"); // Extract the src of the robot
+			this.src = src;
+			int dest = JSON_Robot.getInt("dest"); // Extract the dest of the robot
+			this.dest = dest;
+			int speed = JSON_Robot.getInt("speed"); // Extract the speed of the robot
+			this.speed = speed;
+			int value = JSON_Robot.getInt("value"); // Extract the value of the robot
+			this.value = value;
+			String pos = JSON_Robot.getString("pos"); // Extract the coordinates to String
+			this.pos = new Point3D(pos);
+
+		}
+		catch (Exception e) 
+		{
+			e.printStackTrace();
+		}
 	}
 	
 	public static List<Robot> robotList()
