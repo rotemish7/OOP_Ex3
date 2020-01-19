@@ -69,20 +69,20 @@ public class SimpleGameClient
 	//fruit type -1 from high to low banana
 	public static void test1() 
 	{
-		//game scenario 
+//		//game scenario 
 		int scenario_num = 2;
 		game_service game = Game_Server.getServer(scenario_num); // you have [0,23] games
-
-
-		//add robot to the graph-as the amount of the robots there is
-		//game.addRobot(node_id);
-
-		//shows the scenario objects-robot-fruits how the graph look like
+//
+//
+//		//add robot to the graph-as the amount of the robots there is
+//		//game.addRobot(node_id);
+//
+//		//shows the scenario objects-robot-fruits how the graph look like
 		String g = game.getGraph();
-
+//
 		DGraph DG = new DGraph();
 		DG.init(game.getGraph());
-		
+//		
 
 			
 		new Thread( new Runnable() {
@@ -91,7 +91,7 @@ public class SimpleGameClient
 					@Override
 					public void run()
 					{
-						window = new MyGameGUI(DG);
+						window = new MyGameGUI();
 						window.setVisible(true);
 						
 					}
@@ -111,7 +111,7 @@ public class SimpleGameClient
 			// the list of fruits should be considered in your solution
 			Iterator<String> f_iter = game.getFruits().iterator();
 			while(f_iter.hasNext()) {System.out.println(f_iter.next());}	
-			int src_node = 4;  // arbitrary node, you should start at one of the fruits
+			int src_node = 0;  // arbitrary node, you should start at one of the fruits
 			for(int a = 0;a<rs;a++)
 			{
 				//System.out.println(game.addRobot(src_node+a));
@@ -158,6 +158,7 @@ public class SimpleGameClient
 				{
 					game.chooseNextEdge(0, 5);
 					moveRobots(game, DG);
+					//window.repaint();
 				}
 				String results = game.toString();
 				System.out.println("Game Over: "+results);

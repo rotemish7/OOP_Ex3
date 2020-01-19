@@ -22,6 +22,7 @@ import javax.swing.JOptionPane;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.google.gson.JsonObject;
 
 import Server.Game_Server;
 import Server.game_service;
@@ -47,36 +48,37 @@ public class MyGameGUI extends JFrame implements ActionListener , MouseListener 
 	public Collection<node_data> vertex;
 	public Collection<edge_data> edges;
 	private String typegame = null;;
-	private int scenario = 0; 
-	
-	/**
-	 * Empty constructor
-	 */
-	public MyGameGUI() {}
-	
+	private int scenario; 
+	private Thread t;
+
+
 	/**
 	 * 
 	 * @param dgraph represents a DGraph 
 	 * @param game represents a Game Service
 	 */
-	public MyGameGUI(DGraph dgraph)
+	public MyGameGUI()
 	{
 		initMyGameGUI();
-
-		initGUI();
-	}
 	
+		t = new Thread(this);
+//		t.start();
+	}
+
 	public void initMyGameGUI()
 	{
-		//choose scenario
-		frame = null;
-		String s = JOptionPane.showInputDialog(frame,"Enter manual or auto");
+		this.setSize(1000, 1000);
+		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
+		//choose scenario
+		frame = new JFrame();
+		String s = JOptionPane.showInputDialog(frame,"Enter manual or auto");
+
 		if(s.equals("manual") || s.equals("auto"))
 		{
 			typegame = s;			
 		}
-		
+
 		if(typegame.equals("manual") || typegame.equals("auto"))
 		{
 			String level = JOptionPane.showInputDialog(frame,"Enter level 0 - 23");
@@ -88,7 +90,7 @@ public class MyGameGUI extends JFrame implements ActionListener , MouseListener 
 				;
 			}
 		}
-		
+
 		game = Game_Server.getServer(scenario);
 
 		//initialize the graph
@@ -97,33 +99,23 @@ public class MyGameGUI extends JFrame implements ActionListener , MouseListener 
 		DG.init(game.getGraph());
 		GA.init(DG);
 		this.windowScale();
-		
-	}
-	
-	public void initGUI()
-	{
-		
-		this.setSize(1000, 800);
-		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
 		this.addMouseListener(this);
-		
+
 	}
 
 	public void paint(Graphics g)
 	{
 		super.paint(g);
-//		for (String fruit : game.getFruits()) 
-//		{
-//			creatFruit(fruit);
-//		}
+	
 		drawGraph(g);
-		//List<String> s_Fruit = game.getFruits();
+		
 		fruits = creatFruits(game.getFruits());
 		drawFruits(g);
 		addRobots(game.move());
 		drawRobots(g);
 	}
-	
+
 	/**
 	 * 
 	 * @param g represents a Graphics GUI
@@ -141,9 +133,9 @@ public class MyGameGUI extends JFrame implements ActionListener , MouseListener 
 			g.setColor(Color.BLUE);
 			double x = scale(nodes_src.x(),this.minX,this.maxX,80,this.getWidth()-80);
 			double y = scale(nodes_src.y(),this.minY,this.maxY,80,this.getHeight()-80);
-			g.fillOval((int)x-3, (int)y-5,10,10);
-			g.drawString(Integer.toString(temp.getKey()),(int)x-7,(int)y-7);
-			
+			g.fillOval((int)x-4, (int)y-5,10,10);
+			g.drawString(Integer.toString(temp.getKey()),(int)x-3,(int)y-7);
+
 			this.edges = DG.getE(temp.getKey());
 
 			if(this.edges == null) continue;
@@ -183,7 +175,7 @@ public class MyGameGUI extends JFrame implements ActionListener , MouseListener 
 			}
 		}
 	}
-	
+
 	/**
 	 * 
 	 * @param fruits represents a list of all the fruits 
@@ -191,7 +183,7 @@ public class MyGameGUI extends JFrame implements ActionListener , MouseListener 
 	public List<Fruit> creatFruits(List<String> fruits)
 	{
 		List<Fruit> ans = new ArrayList<Fruit>();
-		
+
 		for (String fruit : fruits) 
 		{
 			Fruit f = new Fruit(fruit);
@@ -199,7 +191,7 @@ public class MyGameGUI extends JFrame implements ActionListener , MouseListener 
 		}
 		return ans;
 	}
-	
+
 
 	/**
 	 * 
@@ -221,7 +213,7 @@ public class MyGameGUI extends JFrame implements ActionListener , MouseListener 
 					apple = new ImageIcon(image2);
 					double x = scale( f.getPos().x(),minX,maxX,80,this.getWidth()-80);
 					double y = scale( f.getPos().y(),minY,maxY,80,this.getHeight()-80);
-					g.drawImage(image2, (int)x, (int)y, this);
+					g.drawImage(image2, (int)x-15, (int)y-10, this);
 				}
 				else
 				{
@@ -231,17 +223,17 @@ public class MyGameGUI extends JFrame implements ActionListener , MouseListener 
 					banana = new ImageIcon(image3);
 					double x = scale( f.getPos().x(),minX,maxX,80,this.getWidth()-80);
 					double y = scale( f.getPos().y(),minY,maxY,80,this.getHeight()-80);
-					g.drawImage(image3, (int)x, (int)y, this);
+					g.drawImage(image3, (int)x-15, (int)y-10, this);
 				}
 			}
 		}
 	}
-	
+
 	public void addRobots(List<String> log)
 	{		
 		if(log!=null)
 		{
-			
+
 			for(int i=0;i<log.size();i++)
 			{
 				String robot_json = log.get(i);
@@ -249,7 +241,7 @@ public class MyGameGUI extends JFrame implements ActionListener , MouseListener 
 				{
 					JSONObject line = new JSONObject(robot_json);
 					JSONObject ttt = line.getJSONObject("Robot");
-					
+
 					int id = ttt.getInt("id");
 					int src = ttt.getInt("src");
 					int dest = ttt.getInt("dest");
@@ -263,8 +255,8 @@ public class MyGameGUI extends JFrame implements ActionListener , MouseListener 
 				catch (JSONException e) {e.printStackTrace();}
 			}
 		}
-		
-		repaint();
+
+		//repaint();
 	}
 
 	/**
@@ -273,109 +265,123 @@ public class MyGameGUI extends JFrame implements ActionListener , MouseListener 
 	 */
 	public void drawRobots(Graphics g)
 	{
-		for (int i = 0; i < robots.size(); i++) 
-		{
-			Robot r = robots.get(i);
-			ImageIcon pac  = new ImageIcon("pac1.png");
-			Image image1 = pac.getImage().getScaledInstance(25, 25, Image.SCALE_SMOOTH);
-			pac = new ImageIcon(image1);
-			double x = scale( r.getPos().x(),minX,maxX,80,this.getWidth()-80);
-			double y = scale( r.getPos().y(),minY,maxY,80,this.getHeight()-80);
-			g.drawImage(image1, (int)x, (int)y, this);
+		List<String> str = game.getRobots();
+//
+//		for (int i = 0; i < str.size(); i++) 
+//		{
+//			try
+//			{
+//				JSONObject obj = new JSONObject(str.get(i));
+//				JSONObject obj2 = obj.getJSONObject("Robot");
+//			}
+//				catch(Exception e)
+//				{
+//
+//				}
+//		}
+			for (int i = 0; i < robots.size(); i++) 
+			{
+				Robot r = robots.get(i);
+				ImageIcon pac  = new ImageIcon("pac1.png");
+				Image image1 = pac.getImage().getScaledInstance(25, 25, Image.SCALE_SMOOTH);
+				pac = new ImageIcon(image1);
+				double x = scale( r.getPos().x(),minX,maxX,80,this.getWidth()-80);
+				double y = scale( r.getPos().y(),minY,maxY,80,this.getHeight()-80);
+				g.drawImage(image1, (int)x-15, (int)y-10, this);
+			}
+
 		}
-		
-	}
 
-	/**
-	 * 
-	 * @param data
-	 * @param r_min
-	 * @param r_max
-	 * @param t_min
-	 * @param t_max
-	 * @return
-	 */
-	private double scale(double data, double r_min, double r_max,double t_min, double t_max)		
-	{
-
-		double res = ((data - r_min) / (r_max-r_min)) * (t_max - t_min) + t_min;
-		return res;
-	}
-
-	/**
-	 * find min and max x and y for scaling.
-	 */
-	public void windowScale()
-	{
-		for (node_data nodes : this.DG.getV()) 
+		/**
+		 * 
+		 * @param data
+		 * @param r_min
+		 * @param r_max
+		 * @param t_min
+		 * @param t_max
+		 * @return
+		 */
+		private double scale(double data, double r_min, double r_max,double t_min, double t_max)		
 		{
-			if(nodes.getLocation().x() > maxX)
+
+			double res = ((data - r_min) / (r_max-r_min)) * (t_max - t_min) + t_min;
+			return res;
+		}
+
+		/**
+		 * find min and max x and y for scaling.
+		 */
+		public void windowScale()
+		{
+			for (node_data nodes : this.DG.getV()) 
 			{
-				maxX = nodes.getLocation().x();
-			}
-			if(nodes.getLocation().x() < minX)
-			{
-				minX = nodes.getLocation().x();
-			}
-			if(nodes.getLocation().y() > maxY)
-			{
-				maxY = nodes.getLocation().y();
-			}
-			if(nodes.getLocation().y() < minY)
-			{
-				minY = nodes.getLocation().y();
+				if(nodes.getLocation().x() > maxX)
+				{
+					maxX = nodes.getLocation().x();
+				}
+				if(nodes.getLocation().x() < minX)
+				{
+					minX = nodes.getLocation().x();
+				}
+				if(nodes.getLocation().y() > maxY)
+				{
+					maxY = nodes.getLocation().y();
+				}
+				if(nodes.getLocation().y() < minY)
+				{
+					minY = nodes.getLocation().y();
+				}
 			}
 		}
+
+		@Override
+		public void run() 
+		{
+
+
+		}
+
+		@Override
+		public void update(Observable arg0, Object arg1) 
+		{
+			// TODO Auto-generated method stub
+
+		}
+
+		@Override
+		public void mouseClicked(MouseEvent arg0) {
+			// TODO Auto-generated method stub
+
+		}
+
+		@Override
+		public void mouseEntered(MouseEvent arg0) {
+			// TODO Auto-generated method stub
+
+		}
+
+		@Override
+		public void mouseExited(MouseEvent arg0) {
+			// TODO Auto-generated method stub
+
+		}
+
+		@Override
+		public void mousePressed(MouseEvent arg0) {
+			// TODO Auto-generated method stub
+
+		}
+
+		@Override
+		public void mouseReleased(MouseEvent arg0) {
+			// TODO Auto-generated method stub
+
+		}
+
+		@Override
+		public void actionPerformed(ActionEvent arg0) {
+			// TODO Auto-generated method stub
+
+		}
+
 	}
-
-	@Override
-	public void run() 
-	{
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void update(Observable arg0, Object arg1) 
-	{
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void mouseClicked(MouseEvent arg0) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void mouseEntered(MouseEvent arg0) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void mouseExited(MouseEvent arg0) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void mousePressed(MouseEvent arg0) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void mouseReleased(MouseEvent arg0) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void actionPerformed(ActionEvent arg0) {
-		// TODO Auto-generated method stub
-
-	}
-
-}
